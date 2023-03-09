@@ -1,0 +1,26 @@
+[package]
+name = "infoit-derive"
+version = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+description = "Derive macros for infoit, cannot be used standalone"
+
+[lib]
+proc-macro = true
+
+[features]
+default = []
+
+[dependencies]
+quote = { workspace = true }
+syn = { workspace = true }
+proc-macro2 = { workspace = true }
+darling = { workspace = true }
+heck = { workspace = true }
+indexmap = {version = "1.9.2", features = ["serde-1"]}
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+derivit-core = { workspace = true }
+

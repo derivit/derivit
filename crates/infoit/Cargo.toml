@@ -1,0 +1,21 @@
+[package]
+name = "infoit"
+version = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+description = "A library for creating infomation for structs and enums."
+
+[[example]]
+name = "infoit"
+
+
+[features]
+default = ["serde"]
+
+[dependencies]
+viewit = { workspace = true }
+infoit-derive = { workspace = true }
+
+serde = { version = "1", optional = true, features = ["derive"] }

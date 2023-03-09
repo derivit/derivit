@@ -1,0 +1,25 @@
+name: infoit
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - crates/infoit/**
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - crates/infoit/**
+  
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose -p infoit
+    - name: Run tests
+      run: cargo test --verbose -p infoit
