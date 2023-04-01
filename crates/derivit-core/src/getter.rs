@@ -156,7 +156,8 @@ impl ToTokens for FieldGetter {
     match &self.converter {
       Some(converter) => {
         let bound = converter.bound.bound.as_ref();
-        let result = match self.style {
+        let style = converter.converter.style.unwrap_or(self.style);
+        let result = match style {
           Style::Ref => match &converter.converter.func {
             Some(conv) => quote! {
               #conv(&self.#field_name)
@@ -175,7 +176,7 @@ impl ToTokens for FieldGetter {
           },
         };
 
-        tokens.extend(match self.style {
+        tokens.extend(match style {
           Style::Ref => quote! {
             #[inline]
             #vis fn #fn_name #bound (&self) -> #field_ty {
@@ -184,7 +185,7 @@ impl ToTokens for FieldGetter {
           },
           Style::Move => quote! {
             #[inline]
-            #vis fn #fn_name #bound (self) ->  {
+            #vis fn #fn_name #bound (self) -> #field_ty {
               #result
             }
           },

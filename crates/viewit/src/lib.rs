@@ -251,6 +251,7 @@ pub fn viewit(
     Ok(viewit) => viewit,
     Err(e) => return e.write_errors().into(),
   };
+  eprintln!("aasdasdasdasd");
   let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
   let generics = &input.generics;
   let name = &input.ident;
@@ -266,6 +267,7 @@ pub fn viewit(
       .to_compile_error()
       .into();
   };
+  eprintln!("wo cao");
 
   match &mut data.fields {
     syn::Fields::Named(fields) => {
@@ -289,12 +291,19 @@ pub fn viewit(
         }
       };
 
+      eprintln!(
+        "{}",
+        quote! {
+          #(#struct_getters)*
+        }
+      );
       if let Some(ref debug) = viewit.debug {
         if let Err(e) = debug.write(&ts) {
           return e.to_compile_error().into();
         }
       }
 
+      eprintln!("wo cao 3");
       ts.into()
     }
     syn::Fields::Unnamed(fields) => {

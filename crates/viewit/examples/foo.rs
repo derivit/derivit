@@ -10,7 +10,6 @@ impl From<&String> for FromString {
   }
 }
 
-
 fn vec_to_string(src: &[u8]) -> String {
   String::from_utf8_lossy(src).to_string()
 }
@@ -87,6 +86,5 @@ struct Foo {
   )]
   f4: Vec<u8>,
 }
-
 
 fn main() {}
