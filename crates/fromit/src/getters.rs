@@ -47,6 +47,8 @@ pub(crate) fn generate_getters(
         vis: vis.clone(),
         fn_name,
         converter: field.getter.result.clone(),
+        compile_time: field.getter.compile_time,
+        attrs: field.getter.attrs.clone(),
       });
     }
   }
@@ -89,6 +91,8 @@ pub(crate) fn generate_getters(
       vis: vis.clone(),
       fn_name,
       converter: field.getter.result.clone(),
+      compile_time: field.getter.compile_time,
+      attrs: field.getter.attrs.clone(),
     });
   }
 

@@ -2,6 +2,9 @@
 
 use std::path::PathBuf;
 
+use darling::{FromMeta, ToTokens};
+use syn::{parse::Parser, Attribute};
+
 pub mod getter;
 pub mod parser;
 pub mod setter;
@@ -102,5 +105,38 @@ impl Debug {
         }
       }
     })
+  }
+}
+
+#[derive(Default, Clone)]
+pub struct Attributes {
+  pub attrs: Vec<syn::Attribute>,
+}
+
+impl core::fmt::Debug for Attributes {
+  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    let attrs = &self.attrs;
+    for attr in attrs.iter() {
+      quote::quote!(#attr).to_string().fmt(f)?;
+    }
+    Ok(())
+  }
+}
+
+impl FromMeta for Attributes {
+  fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
+    let mut attrs = Vec::with_capacity(items.len());
+    for n in items {
+      attrs.extend(Attribute::parse_outer.parse2(quote::quote! { #[#n] })?);
+    }
+    Ok(Attributes { attrs })
+  }
+}
+
+impl ToTokens for Attributes {
+  fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+    for attr in self.attrs.iter() {
+      tokens.extend(quote::quote!(#attr));
+    }
   }
 }

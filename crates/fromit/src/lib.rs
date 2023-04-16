@@ -4,9 +4,9 @@
 use std::collections::{hash_map::Entry, HashMap};
 
 use darling::{FromDeriveInput, FromMeta, ToTokens};
-use derivit_core::{getter::*, setter::FieldSetterOptions};
+use derivit_core::{getter::*, setter::FieldSetterOptions, Attributes};
 use quote::{format_ident, quote};
-use syn::{parse::Parser, parse_macro_input, Attribute};
+use syn::parse_macro_input;
 
 mod setters;
 use setters::*;
@@ -20,39 +20,6 @@ mod field;
 use field::*;
 mod structure;
 use structure::*;
-
-#[derive(Default)]
-struct Attributes {
-  attrs: Vec<syn::Attribute>,
-}
-
-impl core::fmt::Debug for Attributes {
-  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    let attrs = &self.attrs;
-    for attr in attrs.iter() {
-      quote!(#attr).to_string().fmt(f)?;
-    }
-    Ok(())
-  }
-}
-
-impl FromMeta for Attributes {
-  fn from_list(items: &[syn::NestedMeta]) -> darling::Result<Self> {
-    let mut attrs = Vec::with_capacity(items.len());
-    for n in items {
-      attrs.extend(Attribute::parse_outer.parse2(quote! { #[#n] })?);
-    }
-    Ok(Attributes { attrs })
-  }
-}
-
-impl ToTokens for Attributes {
-  fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-    for attr in self.attrs.iter() {
-      tokens.extend(quote!(#attr));
-    }
-  }
-}
 
 #[allow(dead_code)]
 struct FinalGenerics {

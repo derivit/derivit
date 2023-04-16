@@ -30,8 +30,11 @@ pub struct FieldConverter {
 pub struct FieldGetterOptions {
   pub rename: Option<syn::Ident>,
   pub style: Option<Style>,
+  pub attrs: Option<super::Attributes>,
   #[darling(default, rename = "skip")]
   pub ignore: bool,
+  #[darling(default, rename = "const")]
+  pub compile_time: bool,
   pub vis: Option<syn::Visibility>,
   pub result: Option<GetterConverter>,
 }
@@ -138,7 +141,9 @@ pub struct FieldGetter {
   pub field_ty: syn::Type,
   pub style: Style,
   pub vis: syn::Visibility,
+  pub compile_time: bool,
   pub fn_name: syn::Ident,
+  pub attrs: Option<super::Attributes>,
   pub converter: Option<GetterConverter>,
 }
 
@@ -153,6 +158,13 @@ impl ToTokens for FieldGetter {
       .map(|conv| conv.ty.as_ref().unwrap_or(&self.field_ty))
       .unwrap_or(&self.field_ty);
 
+    let compile_time = if self.compile_time {
+      quote! { const }
+    } else {
+      quote! {}
+    };
+
+    let attrs = &self.attrs;
     match &self.converter {
       Some(converter) => {
         let bound = converter.bound.bound.as_ref();
@@ -178,14 +190,16 @@ impl ToTokens for FieldGetter {
 
         tokens.extend(match style {
           Style::Ref => quote! {
+            #attrs
             #[inline]
-            #vis fn #fn_name #bound (&self) -> #field_ty {
+            #vis #compile_time fn #fn_name #bound (&self) -> #field_ty {
               #result
             }
           },
           Style::Move => quote! {
+            #attrs
             #[inline]
-            #vis fn #fn_name #bound (self) -> #field_ty {
+            #vis #compile_time fn #fn_name #bound (self) -> #field_ty {
               #result
             }
           },
@@ -194,8 +208,9 @@ impl ToTokens for FieldGetter {
       None => {
         let style = self.style;
         tokens.extend(quote! {
+            #attrs
             #[inline]
-            #vis fn #fn_name(&self) -> #style #field_ty {
+            #vis #compile_time fn #fn_name(&self) -> #style #field_ty {
               #style self.#field_name
             }
         });

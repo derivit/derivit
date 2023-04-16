@@ -37,9 +37,11 @@ fn vec_to_string(src: &[u8]) -> String {
   // print the generated code to std out, other available values here are: stderr or "path/to/output/file"
   debug = "stdout"
 )]
-struct Foo {
+pub struct Foo {
   #[viewit(
     getter(
+      const,
+      attrs(doc = "asdasd"),
       style = "move",
       rename = "get_first_field",
       vis = "pub" // we do not want the getter for the first field is public, then we can custom field getter
@@ -58,6 +60,7 @@ struct Foo {
 
   #[viewit(
     getter(
+      attrs(doc(hidden)),
       result(
         // sometimes we may want to convert the f4 field to a generic type
         type = "T",

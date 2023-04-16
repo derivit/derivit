@@ -6,8 +6,11 @@ use quote::{format_ident, quote, ToTokens};
 pub struct FieldSetterOptions {
   pub rename: Option<syn::Ident>,
   pub style: Option<SetterStyle>,
+  pub attrs: Option<super::Attributes>,
   #[darling(default, rename = "skip")]
   pub ignore: bool,
+  #[darling(default, rename = "const")]
+  pub compile_time: bool,
   pub vis: Option<syn::Visibility>,
   #[darling(default)]
   pub bound: FnGenerics,
@@ -48,6 +51,7 @@ pub enum SetterStyle {
 }
 
 impl SetterStyle {
+  #[allow(clippy::too_many_arguments)]
   fn to_setter(
     &self,
     fn_vis: &syn::Visibility,
@@ -55,26 +59,36 @@ impl SetterStyle {
     field_name: &syn::Ident,
     field_ty: &syn::Type,
     fn_name: &syn::Ident,
+    compile_time: bool,
+    attrs: Option<super::Attributes>,
   ) -> proc_macro2::TokenStream {
+    let compile_time = if compile_time {
+      quote! { const }
+    } else {
+      quote! {}
+    };
     match self {
       Self::Ref => quote! {
+        #attrs
         #[inline]
-        #fn_vis fn #fn_name #bound (&mut self, val: #field_ty) {
+        #fn_vis #compile_time fn #fn_name #bound (&mut self, val: #field_ty) {
           self.#field_name = val;
         }
 
       },
       Self::Move => quote! {
+        #attrs
         #[inline]
-        #fn_vis fn #fn_name #bound (mut self, val: #field_ty) -> Self {
+        #fn_vis #compile_time fn #fn_name #bound (mut self, val: #field_ty) -> Self {
           self.#field_name = val;
           self
         }
 
       },
       Self::Into => quote! {
+        #attrs
         #[inline]
-        #fn_vis fn #fn_name #bound (mut self, val: impl core::convert::Into<#field_ty>) -> Self {
+        #fn_vis #compile_time fn #fn_name #bound (mut self, val: impl core::convert::Into<#field_ty>) -> Self {
           self.#field_name = ::core::convert::Into::into(val);
           self
         }
@@ -89,12 +103,12 @@ impl SetterStyle {
           syn::parse_str::<syn::Generics>(&bound).unwrap()
         });
         quote! {
+          #attrs
           #[inline]
-          #fn_vis fn #fn_name #bound (mut self, val: impl ::core::convert::TryInto<#field_ty, Error = Error>) -> ::core::result::Result<Self, Error> {
+          #fn_vis #compile_time fn #fn_name #bound (mut self, val: impl ::core::convert::TryInto<#field_ty, Error = Error>) -> ::core::result::Result<Self, Error> {
             self.#field_name = ::core::convert::TryInto::try_into(val)?;
             ::core::result::Result::Ok(self)
           }
-
         }
       }
     }
@@ -108,6 +122,8 @@ pub struct FieldSetter {
   pub field_ty: syn::Type,
   pub fn_name: syn::Ident,
   pub style: SetterStyle,
+  pub attrs: Option<super::Attributes>,
+  pub compile_time: bool,
 }
 
 impl ToTokens for FieldSetter {
@@ -118,6 +134,14 @@ impl ToTokens for FieldSetter {
     let field_ty = &self.field_ty;
     let fn_name = &self.fn_name;
     let style = &self.style;
-    tokens.extend(style.to_setter(fn_vis, bound, field_name, field_ty, fn_name));
+    tokens.extend(style.to_setter(
+      fn_vis,
+      bound,
+      field_name,
+      field_ty,
+      fn_name,
+      self.compile_time,
+      self.attrs.clone(),
+    ));
   }
 }

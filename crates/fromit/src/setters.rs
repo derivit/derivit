@@ -51,6 +51,8 @@ pub(crate) fn generate_setters(
         vis: vis.clone(),
         fn_name,
         bound: field.setter.bound.bound.clone(),
+        compile_time: field.setter.compile_time,
+        attrs: field.setter.attrs.clone(),
       });
     }
   }
@@ -90,6 +92,8 @@ pub(crate) fn generate_setters(
       vis: vis.clone(),
       fn_name,
       bound: field.setter.bound.bound.clone(),
+      compile_time: field.setter.compile_time,
+      attrs: field.setter.attrs.clone(),
     });
   }
 

@@ -144,6 +144,8 @@ fn handle_fields<'a>(
           vis: vis.clone(),
           fn_name,
           converter: field.getter.result.clone(),
+          compile_time: field.getter.compile_time,
+          attrs: field.getter.attrs.clone(),
         });
       }
     }
@@ -178,6 +180,8 @@ fn handle_fields<'a>(
           vis: vis.clone(),
           fn_name,
           bound: field.setter.bound.bound.clone(),
+          compile_time: field.setter.compile_time,
+          attrs: field.setter.attrs.clone(),
         });
       }
     }
@@ -288,7 +292,7 @@ pub fn viewit(
           #(#struct_setters)*
         }
       };
- 
+
       if let Some(ref debug) = viewit.debug {
         if let Err(e) = debug.write(&ts) {
           return e.to_compile_error().into();
